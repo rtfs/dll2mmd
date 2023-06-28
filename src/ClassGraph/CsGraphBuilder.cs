@@ -11,6 +11,7 @@ public class CsGraphBuilder : IGraphBuilder
         var ret = new Graph();
         foreach (var type in types)
         {
+            Console.WriteLine(type.Name);
             var c = BuildClass(type);
             ret.AddClass(c);
         }
@@ -57,7 +58,8 @@ public class CsGraphBuilder : IGraphBuilder
                 {
                     typeArgs.Add(argType.Name);
                 }
-                m.GenericType = method.ReturnType.Name;
+                m.GenericType = method.ReturnType.Name.TrimEnd('`', '1'); //trim end '`1' of generic type name. e.g. IList`1
+;
                 m.TypeParams = typeArgs;
             }
             else
@@ -82,7 +84,7 @@ public class CsGraphBuilder : IGraphBuilder
                 {
                     typeArgs.Add(argType.Name);
                 }
-                p.GenericType = prop.PropertyType.Name;
+                p.GenericType = prop.PropertyType.Name.TrimEnd('`', '1'); //trim end '`1' of generic type name. e.g. IList`1
                 p.TypeParams = typeArgs;
             }
             else
