@@ -9,6 +9,9 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>dll2mmd</ToolCommandName>
+    <PackageOutputPath>../../nupkg</PackageOutputPath>
   </PropertyGroup>
 
 </Project>
