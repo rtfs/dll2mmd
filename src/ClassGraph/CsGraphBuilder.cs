@@ -21,10 +21,10 @@ public class CsGraphBuilder : IGraphBuilder
 
     private Class BuildClass(Type type)
     {
-        var c = new Class(type.Name)
+        var c = new Class(type.Name.TrimEnd('`', '1', '2', '3'))
         {
             IsInterface = type.IsInterface,
-            BaseType = type.BaseType?.Name,
+            BaseType = type.BaseType?.Name.TrimEnd('`', '1', '2', '3'), //trim end '`1' of generic type name. e.g. IList`1
             ImplementedInterface = type.GetTypeInfo().ImplementedInterfaces.Select(o => o.Name).ToList()
         };
 
@@ -56,15 +56,14 @@ public class CsGraphBuilder : IGraphBuilder
                 var typeArgs = new List<string>();
                 foreach (var argType in method.ReturnType.GenericTypeArguments)
                 {
-                    typeArgs.Add(argType.Name);
+                    typeArgs.Add(argType.Name.TrimEnd('`', '1', '2', '3'));
                 }
-                m.GenericType = method.ReturnType.Name.TrimEnd('`', '1'); //trim end '`1' of generic type name. e.g. IList`1
-;
+                m.GenericType = method.ReturnType.Name.TrimEnd('`', '1', '2', '3'); //trim end '`1' of generic type name. e.g. IList`1
                 m.TypeParams = typeArgs;
             }
             else
             {
-                m.Type = method.ReturnType.Name;
+                m.Type = method.ReturnType.Name.TrimEnd('`', '1', '2', '3'); //trim end '`1' of generic type name. e.g. IList`1
             }
             ret.Add(m);
         }
@@ -82,14 +81,14 @@ public class CsGraphBuilder : IGraphBuilder
                 var typeArgs = new List<string>();
                 foreach (var argType in prop.PropertyType.GenericTypeArguments)
                 {
-                    typeArgs.Add(argType.Name);
+                    typeArgs.Add(argType.Name.TrimEnd('`', '1', '2', '3'));
                 }
-                p.GenericType = prop.PropertyType.Name.TrimEnd('`', '1'); //trim end '`1' of generic type name. e.g. IList`1
+                p.GenericType = prop.PropertyType.Name.TrimEnd('`', '1', '2', '3'); //trim end '`1' of generic type name. e.g. IList`1
                 p.TypeParams = typeArgs;
             }
             else
             {
-                p.Type = prop.PropertyType.Name;
+                p.Type = prop.PropertyType.Name.TrimEnd('`', '1', '2', '3'); //trim end '`1' of generic type name. e.g. IList`1
             }
             ret.Add(p);
         }
@@ -103,11 +102,24 @@ public class CsGraphBuilder : IGraphBuilder
         foreach (var file in files)
         {
             var ass = Assembly.LoadFile(file);
-            foreach (var type in ass.ExportedTypes)
+            if (!nsList.Any() && !typenameList.Any())
             {
-                if ((nsList.Contains(type.Namespace) || typenameList.Contains(type.Name)) && (type.IsClass || type.IsInterface))
+                foreach (var type in ass.ExportedTypes)
                 {
-                    types.Add(type);
+                    if (type.IsClass || type.IsInterface)
+                    {
+                        types.Add(type);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var type in ass.ExportedTypes)
+                {
+                    if ((nsList.Contains(type.Namespace) || typenameList.Contains(type.Name)) && (type.IsClass || type.IsInterface))
+                    {
+                        types.Add(type);
+                    }
                 }
             }
         }

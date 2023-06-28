@@ -1,15 +1,14 @@
 ﻿using DiagramGenerator.ClassGraph;
 using System.CommandLine;
 
-
-class Program
+internal class Program
 {
-    static async Task<int> Main(string[] args)
+    private static async Task<int> Main(string[] args)
     {
         var outputOption = new Option<FileInfo?>(
-                    name: "--output",
-                    description: "Output file.",
-                    getDefaultValue: () => new FileInfo("output.md"));
+        name: "--output",
+        description: "Output file.",
+        getDefaultValue: () => new FileInfo("output.md"));
         outputOption.AddAlias("-o");
 
         var nsOption = new Option<IList<string>>(
@@ -23,7 +22,26 @@ class Program
 
         var filesOption = new Option<IList<string>>(
                     name: "--files",
-                    description: "Dll files from which to fetch classes.")
+                    description: "Dll files from which to fetch classes.",
+                    isDefault: true,
+                    parseArgument: result =>
+                    {
+                        var ret = new List<string>();
+                        foreach (var token in result.Tokens)
+                        {
+                            string? filePath = token.Value;
+                            if (!File.Exists(filePath))
+                            {
+                                result.ErrorMessage = $"File does not exist {filePath}";
+                                return new List<string>();
+                            }
+                            else
+                            {
+                                ret.Add(filePath);
+                            }
+                        }
+                        return ret;
+                    })
         {
             IsRequired = true,
             AllowMultipleArgumentsPerToken = true
@@ -41,21 +59,7 @@ class Program
 
         var ignoreDepencencyOption = new Option<bool>(
                     name: "--ignore-dependency",
-                    description: "If true, only dependency of inheritance and implementation would be generating.");
-        // getDefaultValue: () => true);
-        // isDefault: true,
-        // parseArgument: result =>
-        //     {
-        //         if (result.Tokens.Count == 0)
-        //         {
-        //             return false;
-
-        //         }
-        //         else
-        //         {
-        //             return true;
-        //         }
-        //     });
+                    description: "If true, only dependency of inheritance and implementation would be generated.");
 
         var rootCommand = new RootCommand("Generate mermaid.js class-diagram from .net dll files.");
         rootCommand.AddOption(outputOption);
@@ -71,28 +75,15 @@ class Program
             outputOption, nsOption, filesOption, tnOption, ignoreDepencencyOption);
 
         return await rootCommand.InvokeAsync(args);
-    }
 
-    static void Execute(FileInfo outputFile, IList<string> nsList, IList<string> files, IList<string> tnList, bool ignoreDependency)
-    {
-        foreach (var fn in files)
+        void Execute(FileInfo outputFile, IList<string> nsList, IList<string> files, IList<string> tnList, bool ignoreDependency)
         {
-            Console.WriteLine(fn);
+            string output = outputFile?.FullName ?? string.Empty;
+            var builder = new CsGraphBuilder();
+            var graph = builder.Build(files, nsList, tnList, ignoreDependency);
+            var generator = new MermaidGenerator();
+            var text = generator.Generate(graph);
+            File.WriteAllText(output, text);
         }
-        foreach (var ns in nsList)
-        {
-            Console.WriteLine(ns);
-        }
-        foreach (var tn in tnList)
-        {
-            Console.WriteLine(tn);
-        }
-
-        string output = outputFile?.FullName ?? string.Empty;
-        var builder = new CsGraphBuilder();
-        var graph = builder.Build(files, nsList, tnList, ignoreDependency);
-        var generator = new MermaidGenerator();
-        var text = generator.Generate(graph);
-        File.WriteAllText(output, text);
     }
 }
