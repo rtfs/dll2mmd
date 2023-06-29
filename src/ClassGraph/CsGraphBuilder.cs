@@ -9,30 +9,26 @@ public class CsGraphBuilder : IGraphBuilder
     public Graph Build(IEnumerable<string> files, IEnumerable<string> nsList, IEnumerable<string> typenameList, bool inheritanceOnly)
     {
 
-        var runtimeDirectory = RuntimeEnvironment.GetRuntimeDirectory();
-        // Console.WriteLine($"Loading core assemblies from: {Environment.NewLine}{runtimeDirectory}");
-        string[] runtimeAssemblies = Directory.GetFiles(runtimeDirectory, "*.dll");
-        IList<string> allPath = new List<string>(runtimeAssemblies);
+        var rtDir = RuntimeEnvironment.GetRuntimeDirectory();
+        string[] rtDll = Directory.GetFiles(rtDir, "*.dll");
+        var allPath = new List<string>(rtDll);
 
         foreach (var file in files)
         {
             var pathFile = file;
             if (!Path.IsPathRooted(pathFile))
                 pathFile = Path.GetFullPath(pathFile);
-            string[] modelAssemblies = Directory.GetFiles(Path.GetDirectoryName(pathFile)!, "*.dll");
-            // Console.WriteLine($"Following libraries will be scanned: {Environment.NewLine}{string.Join(Environment.NewLine, modelAssemblies)}{Environment.NewLine}");
-            allPath = allPath.Union(modelAssemblies).ToList();
+            string[] localDlls = Directory.GetFiles(Path.GetDirectoryName(pathFile)!, "*.dll");
+            allPath = allPath.Union(localDlls).ToList();
         }
 
-        var resolver = new PathAssemblyResolver(allPath);
-        using var mlc = new MetadataLoadContext(resolver);
-
+        var par = new PathAssemblyResolver(allPath);
+        using var mlc = new MetadataLoadContext(par);
         var types = GetTypes(files, nsList, typenameList, mlc);
 
         var ret = new Graph();
         foreach (var type in types)
         {
-            // Console.WriteLine(type.Name);
             var c = BuildClass(type);
             ret.AddClass(c);
         }
@@ -119,15 +115,12 @@ public class CsGraphBuilder : IGraphBuilder
     private IList<Type> GetTypes(IEnumerable<string> files, IEnumerable<string> nsList, IEnumerable<string> typenameList, MetadataLoadContext mlc)
     {
         var types = new List<Type>();
-        // modules = new List<string>();
         foreach (var file in files)
         {
-            // var ass = Assembly.LoadFrom(pathFile);
-            // var ass = AssemblyLoadContext.Default.LoadFromAssemblyPath(pathFile);
             var pathFile = file;
             if (!Path.IsPathRooted(pathFile))
                 pathFile = Path.GetFullPath(pathFile);
-            Assembly ass = mlc.LoadFromAssemblyPath(pathFile);
+            var ass = mlc.LoadFromAssemblyPath(pathFile);
 
             if (!nsList.Any() && !typenameList.Any())
             {
