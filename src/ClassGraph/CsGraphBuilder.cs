@@ -10,7 +10,7 @@ public class CsGraphBuilder : IGraphBuilder
     {
 
         var runtimeDirectory = RuntimeEnvironment.GetRuntimeDirectory();
-        Console.WriteLine($"Loading core assemblies from: {Environment.NewLine}{runtimeDirectory}");
+        // Console.WriteLine($"Loading core assemblies from: {Environment.NewLine}{runtimeDirectory}");
         string[] runtimeAssemblies = Directory.GetFiles(runtimeDirectory, "*.dll");
         IList<string> allPath = new List<string>(runtimeAssemblies);
 
@@ -20,7 +20,7 @@ public class CsGraphBuilder : IGraphBuilder
             if (!Path.IsPathRooted(pathFile))
                 pathFile = Path.GetFullPath(pathFile);
             string[] modelAssemblies = Directory.GetFiles(Path.GetDirectoryName(pathFile)!, "*.dll");
-            Console.WriteLine($"Following libraries will be scanned: {Environment.NewLine}{string.Join(Environment.NewLine, modelAssemblies)}{Environment.NewLine}");
+            // Console.WriteLine($"Following libraries will be scanned: {Environment.NewLine}{string.Join(Environment.NewLine, modelAssemblies)}{Environment.NewLine}");
             allPath = allPath.Union(modelAssemblies).ToList();
         }
 
@@ -32,7 +32,7 @@ public class CsGraphBuilder : IGraphBuilder
         var ret = new Graph();
         foreach (var type in types)
         {
-            Console.WriteLine(type.Name);
+            // Console.WriteLine(type.Name);
             var c = BuildClass(type);
             ret.AddClass(c);
         }

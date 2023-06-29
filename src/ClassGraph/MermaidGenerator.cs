@@ -5,6 +5,7 @@ public class MermaidGenerator : IDiagramGenerator
     private static string MDFrame = 
 @"```mermaid
 classDiagram
+
 {0}
 {1}
 ```
@@ -12,9 +13,7 @@ classDiagram
 
     private static string ClassFrame = 
 @"class {0}
-{1}
-{2}
-";
+{1}{2}";
 
     public string Generate(Graph graph)
     {

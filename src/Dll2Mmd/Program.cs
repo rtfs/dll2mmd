@@ -6,24 +6,23 @@ internal class Program
     private static async Task<int> Main(string[] args)
     {
         var outputOption = new Option<FileInfo?>(
-        name: "--output",
+        aliases: new[] {"--output", "-o"},
         description: "Output file.",
         getDefaultValue: () => new FileInfo("output.md"));
         outputOption.AddAlias("-o");
 
         var nsOption = new Option<IList<string>>(
-                    name: "--namespace",
+                    aliases: new[] {"--namespace", "-ns"},
                     description: "Namespace from which to fetch classes.",
                     getDefaultValue: () => new List<string>())
         {
             AllowMultipleArgumentsPerToken = true
         };
-        nsOption.AddAlias("-ns");
 
         var filesOption = new Option<IList<string>>(
-                    name: "--files",
+                    aliases: new[] {"--files", "-f"},
                     description: "Dll files from which to fetch classes.",
-                    isDefault: true,
+                    // isDefault: true,
                     parseArgument: result =>
                     {
                         var ret = new List<string>();
@@ -41,21 +40,20 @@ internal class Program
                             }
                         }
                         return ret;
-                    })
+                    }
+                    )
         {
             IsRequired = true,
             AllowMultipleArgumentsPerToken = true
         };
-        filesOption.AddAlias("-f");
 
         var tnOption = new Option<IList<string>>(
-                    name: "--type-names",
+                    aliases: new[] {"--type-names", "-t"},
                     description: "Name of specific classes to form the diagram.",
                     getDefaultValue: () => new List<string>())
         {
             AllowMultipleArgumentsPerToken = true
         };
-        tnOption.AddAlias("-t");
 
         var ignoreDepencencyOption = new Option<bool>(
                     name: "--ignore-dependency",
