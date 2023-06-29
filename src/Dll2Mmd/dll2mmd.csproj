@@ -20,8 +20,8 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>dll2mmd</ToolCommandName>
     <PackageOutputPath>../../nupkg</PackageOutputPath>
-    <Version>1.0.3</Version>
-    <Tags>mermaid, mermaid.js, dotnet, class-diagram</Tags>
+    <Version>1.0.4</Version>
+    <PackageTags>mermaid class diagram markdown dotnet tool dll generate</PackageTags>
     <Authors>ywh</Authors>
     <Company>ywh</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
