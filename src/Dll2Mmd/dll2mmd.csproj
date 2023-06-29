@@ -20,7 +20,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>dll2mmd</ToolCommandName>
     <PackageOutputPath>../../nupkg</PackageOutputPath>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>ywh</Authors>
     <Company>ywh</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
