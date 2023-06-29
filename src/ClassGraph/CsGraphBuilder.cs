@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 
 namespace DiagramGenerator.ClassGraph;
 
@@ -6,7 +8,26 @@ public class CsGraphBuilder : IGraphBuilder
 {
     public Graph Build(IEnumerable<string> files, IEnumerable<string> nsList, IEnumerable<string> typenameList, bool inheritanceOnly)
     {
-        var types = GetTypes(files, nsList, typenameList);
+
+        var runtimeDirectory = RuntimeEnvironment.GetRuntimeDirectory();
+        Console.WriteLine($"Loading core assemblies from: {Environment.NewLine}{runtimeDirectory}");
+        string[] runtimeAssemblies = Directory.GetFiles(runtimeDirectory, "*.dll");
+        IList<string> allPath = new List<string>(runtimeAssemblies);
+
+        foreach (var file in files)
+        {
+            var pathFile = file;
+            if (!Path.IsPathRooted(pathFile))
+                pathFile = Path.GetFullPath(pathFile);
+            string[] modelAssemblies = Directory.GetFiles(Path.GetDirectoryName(pathFile)!, "*.dll");
+            Console.WriteLine($"Following libraries will be scanned: {Environment.NewLine}{string.Join(Environment.NewLine, modelAssemblies)}{Environment.NewLine}");
+            allPath = allPath.Union(modelAssemblies).ToList();
+        }
+
+        var resolver = new PathAssemblyResolver(allPath);
+        using var mlc = new MetadataLoadContext(resolver);
+
+        var types = GetTypes(files, nsList, typenameList, mlc);
 
         var ret = new Graph();
         foreach (var type in types)
@@ -95,16 +116,22 @@ public class CsGraphBuilder : IGraphBuilder
         return ret;
     }
 
-    private IList<Type> GetTypes(IEnumerable<string> files, IEnumerable<string> nsList, IEnumerable<string> typenameList)
+    private IList<Type> GetTypes(IEnumerable<string> files, IEnumerable<string> nsList, IEnumerable<string> typenameList, MetadataLoadContext mlc)
     {
         var types = new List<Type>();
         // modules = new List<string>();
         foreach (var file in files)
         {
-            var ass = Assembly.LoadFile(file);
+            // var ass = Assembly.LoadFrom(pathFile);
+            // var ass = AssemblyLoadContext.Default.LoadFromAssemblyPath(pathFile);
+            var pathFile = file;
+            if (!Path.IsPathRooted(pathFile))
+                pathFile = Path.GetFullPath(pathFile);
+            Assembly ass = mlc.LoadFromAssemblyPath(pathFile);
+
             if (!nsList.Any() && !typenameList.Any())
             {
-                foreach (var type in ass.ExportedTypes)
+                foreach (var type in ass.GetExportedTypes())
                 {
                     if (type.IsClass || type.IsInterface)
                     {
