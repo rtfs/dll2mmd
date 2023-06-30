@@ -20,23 +20,26 @@ public class Graph
         Relations = new List<ClassRelation>();
         foreach (var @class in Classes)
         {
+            var baseClass = Classes.Where(o => o.Name == @class.BaseType).FirstOrDefault();
+
             //inheritance
-            if (!string.IsNullOrEmpty(@class.BaseType))
+            if (baseClass != null)
             {
-                var baseClass = Classes.Where(o => o.Name == @class.BaseType).FirstOrDefault();
-                if (baseClass != null)
-                {
-                    var relation = new ClassRelation(@class, baseClass, RelationType.Inheritance);
-                    AddRelation(relation);
-                }
+                var relation = new ClassRelation(@class, baseClass, RelationType.Inheritance);
+                AddRelation(relation);
             }
 
             // implementation
             foreach (var intf in @class.ImplementedInterface)
             {
                 var intfClass = Classes.Where(o => o.Name == intf).FirstOrDefault();
+
                 if (intfClass != null)
                 {
+                    if (baseClass != null && baseClass.ImplementedInterface.Contains(intf))
+                    {
+                        continue;
+                    }
                     var relation = new ClassRelation(@class, intfClass, RelationType.Implementation);
                     AddRelation(relation);
                 }
