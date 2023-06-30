@@ -8,11 +8,14 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>dll2mmd</ToolCommandName>
     <PackageOutputPath>../../nupkg</PackageOutputPath>
-    <Version>1.0.5</Version>
-    <PackageTags>mermaid diagram generate</PackageTags>
+    <Version>1.0.6</Version>
+    <PackageTags>mermaid;diagram;generate;C#</PackageTags>
+    <Copyright>Copyright 2023 ywh</Copyright>
     <Authors>ywh</Authors>
-    <Company>ywh</Company>
+    <Owners>ywh</Owners>
+    <RepositoryUrl>https://github.com/rtfs/dll2mmd</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>Dotnet tool for generating mermaid class-diagram from assemblies.</PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>
